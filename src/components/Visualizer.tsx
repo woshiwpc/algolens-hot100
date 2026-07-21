@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { Step } from '../types/step'
+import type { ProblemDefinition } from '../catalog/types'
 import { CodePanel } from './CodePanel'
 import { PlaybackControls } from './PlaybackControls'
 import { VariablePanel } from './VariablePanel'
@@ -14,6 +15,7 @@ import { VariablePanel } from './VariablePanel'
 interface VisualizerProps<TSnapshot> {
   steps: Step<TSnapshot>[]
   sourceCode: string
+  codeReference?: ProblemDefinition['codeReference']
   resetKey: number
   renderSnapshot: (snapshot: TSnapshot) => ReactNode
   viewName?: string
@@ -22,6 +24,7 @@ interface VisualizerProps<TSnapshot> {
 export function Visualizer<TSnapshot>({
   steps,
   sourceCode,
+  codeReference,
   resetKey,
   renderSnapshot,
   viewName = 'AlgorithmView',
@@ -114,6 +117,7 @@ export function Visualizer<TSnapshot>({
         <CodePanel
           code={displayCode}
           activeLine={currentStep.codeLine}
+          codeReference={codeReference}
           onCodeChange={setDisplayCode}
           onResetCode={() => setDisplayCode(sourceCode)}
         />

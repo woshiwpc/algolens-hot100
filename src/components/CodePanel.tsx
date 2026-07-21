@@ -8,8 +8,9 @@ import {
   lineNumbers,
 } from '@codemirror/view'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { Braces, Check, Copy, RotateCcw } from 'lucide-react'
+import { Braces, Check, Copy, ExternalLink, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import type { ProblemDefinition } from '../catalog/types'
 
 const setHighlightedLine = StateEffect.define<number>()
 
@@ -41,6 +42,7 @@ const highlightedLineField = StateField.define<DecorationSet>({
 interface CodePanelProps {
   code: string
   activeLine: number
+  codeReference?: ProblemDefinition['codeReference']
   onCodeChange: (code: string) => void
   onResetCode: () => void
 }
@@ -48,6 +50,7 @@ interface CodePanelProps {
 export function CodePanel({
   code,
   activeLine,
+  codeReference,
   onCodeChange,
   onResetCode,
 }: CodePanelProps) {
@@ -187,6 +190,18 @@ export function CodePanel({
           </span>
           <span className="text-[12px] font-semibold text-slate-100">C++ 代码</span>
           <span className="rounded-full bg-emerald-400/12 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-200">可编辑</span>
+          {codeReference && (
+            <a
+              href={codeReference.url}
+              target="_blank"
+              rel="noreferrer"
+              title={`${codeReference.pageTitle} · ${codeReference.cppVariants} 种 C++ 写法`}
+              className="flex items-center gap-1 rounded-full border border-sky-400/20 bg-sky-400/8 px-1.5 py-0.5 text-[8px] font-semibold text-sky-200 transition hover:border-sky-300/40 hover:bg-sky-400/14"
+            >
+              随想录参考
+              <ExternalLink size={8} aria-hidden="true" />
+            </a>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           <button

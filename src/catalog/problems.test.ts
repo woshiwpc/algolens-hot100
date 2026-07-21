@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { generateProblemSteps } from './generateSteps'
 import { categories, problems } from './problems'
+import { carlReferences } from './carlReferences'
 
 describe('Hot 100 catalog', () => {
   it('contains exactly 100 unique official problems', () => {
@@ -14,6 +15,16 @@ describe('Hot 100 catalog', () => {
     expect(categories).toContain('哈希')
     expect(categories).toContain('多维动态规划')
     expect(categories).toContain('技巧')
+  })
+
+  it('links the 55 matched problems to their CodeThought C++ references', () => {
+    expect(Object.keys(carlReferences)).toHaveLength(55)
+    expect(problems.filter((problem) => problem.codeReference)).toHaveLength(55)
+    for (const reference of Object.values(carlReferences)) {
+      expect(reference.url).toMatch(/^https:\/\/programmercarl\.com\//)
+      expect(reference.cppVariants).toBeGreaterThan(0)
+      expect(reference.pageTitle.length).toBeGreaterThan(0)
+    }
   })
 
   it('provides standard C++ and valid animation frames for every problem', () => {

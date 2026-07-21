@@ -25,6 +25,12 @@ export interface ProblemDefinition {
   examples: [string, string, string]
   visualKind: VisualKind
   sourceCode: string
+  codeReference?: {
+    label: '代码随想录参考'
+    pageTitle: string
+    url: string
+    cppVariants: number
+  }
 }
 
 export interface VisualNode {
