@@ -1,7 +1,6 @@
 import {
   Binary,
   Braces,
-  Check,
   ChevronRight,
   CircleDot,
   GitBranch,
@@ -177,33 +176,6 @@ function App() {
           </div>
         </section>
 
-        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <ArchitectureChip
-            number="01"
-            title="solution.cpp"
-            detail="只负责展示与高亮"
-            done
-          />
-          <ArchitectureChip
-            number="02"
-            title="steps.ts"
-            detail={`${steps.length} 帧状态已生成`}
-            done
-          />
-          <ArchitectureChip
-            number="03"
-            title="Visualizer"
-            detail="通用播放控制外壳"
-            done
-          />
-          <ArchitectureChip
-            number="04"
-            title="WindowView"
-            detail="本题专属数据视图"
-            done
-          />
-        </div>
-
         <Visualizer
           steps={steps}
           sourceCode={solutionCode}
@@ -227,37 +199,6 @@ function App() {
           </div>
         </footer>
       </main>
-    </div>
-  )
-}
-
-interface ArchitectureChipProps {
-  number: string
-  title: string
-  detail: string
-  done?: boolean
-}
-
-function ArchitectureChip({
-  number,
-  title,
-  detail,
-  done,
-}: ArchitectureChipProps) {
-  return (
-    <div className="flex min-w-0 items-center gap-2.5 rounded-xl border border-slate-900 bg-[#0a0e14] px-3 py-2">
-      <span className="font-mono text-[9px] text-slate-700">{number}</span>
-      <div className="min-w-0 flex-1">
-        <div className="truncate font-mono text-[10px] font-semibold text-slate-400">
-          {title}
-        </div>
-        <div className="truncate text-[9px] text-slate-700">{detail}</div>
-      </div>
-      {done && (
-        <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-emerald-500/10 text-emerald-400">
-          <Check size={9} />
-        </span>
-      )}
     </div>
   )
 }
