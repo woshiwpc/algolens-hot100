@@ -9,7 +9,7 @@ src/
 ├─ components/
 │  ├─ Visualizer.tsx          # 通用播放器外壳
 │  ├─ PlaybackControls.tsx    # 播放/暂停/单步/调速/进度
-│  ├─ CodePanel.tsx           # CodeMirror 6 + C++ 逐行高亮
+│  ├─ CodePanel.tsx           # 可编辑 CodeMirror 6 + C++ 逐行高亮
 │  └─ VariablePanel.tsx       # 通用变量状态面板
 ├─ problems/
 │  └─ longest-substring/
@@ -35,6 +35,8 @@ interface Step<TSnapshot = unknown> {
 ```
 
 `Visualizer` 只消费 `Step[]`、C++ 源码和一个 `renderSnapshot` 函数。扩展新题时，播放器、代码面板和变量面板无需复制。
+
+代码面板允许直接修改展示用 C++，并可一键恢复标准实现。修改不会参与算法计算；动画仍由 `steps.ts` 生成，并按原始代码行号高亮。步骤切换只滚动代码面板内部，不改变浏览器页面位置。
 
 ## 本地运行
 

@@ -8,7 +8,7 @@ import {
   lineNumbers,
 } from '@codemirror/view'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { Braces, Check, Copy } from 'lucide-react'
+import { Braces, Check, Copy, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 const setHighlightedLine = StateEffect.define<number>()
@@ -41,30 +41,47 @@ const highlightedLineField = StateField.define<DecorationSet>({
 interface CodePanelProps {
   code: string
   activeLine: number
+  onCodeChange: (code: string) => void
+  onResetCode: () => void
 }
 
-export function CodePanel({ code, activeLine }: CodePanelProps) {
+export function CodePanel({
+  code,
+  activeLine,
+  onCodeChange,
+  onResetCode,
+}: CodePanelProps) {
   const editorHostRef = useRef<HTMLDivElement>(null)
   const editorViewRef = useRef<EditorView | null>(null)
+  const initialCodeRef = useRef(code)
+  const onCodeChangeRef = useRef(onCodeChange)
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    onCodeChangeRef.current = onCodeChange
+  }, [onCodeChange])
 
   useEffect(() => {
     if (!editorHostRef.current) return
 
     const state = EditorState.create({
-      doc: code,
+      doc: initialCodeRef.current,
       extensions: [
         lineNumbers(),
         highlightActiveLineGutter(),
         cpp(),
         oneDark,
         highlightedLineField,
-        EditorState.readOnly.of(true),
-        EditorView.editable.of(false),
+        EditorView.editable.of(true),
         EditorView.lineWrapping,
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            onCodeChangeRef.current(update.state.doc.toString())
+          }
+        }),
         EditorView.contentAttributes.of({
-          'aria-label': 'C++ 题解代码，只读',
-          tabindex: '0',
+          'aria-label': '可编辑的 C++ 题解代码',
+          spellcheck: 'false',
         }),
         EditorView.theme({
           '&': {
@@ -77,10 +94,14 @@ export function CodePanel({ code, activeLine }: CodePanelProps) {
               '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',
             lineHeight: '1.82',
             padding: '12px 0 24px',
+            overscrollBehavior: 'contain',
           },
           '.cm-content': {
-            caretColor: 'transparent',
+            caretColor: '#c4b5fd',
             paddingRight: '16px',
+          },
+          '.cm-cursor': {
+            borderLeftColor: '#c4b5fd',
           },
           '.cm-gutters': {
             backgroundColor: '#0b1018',
@@ -92,15 +113,16 @@ export function CodePanel({ code, activeLine }: CodePanelProps) {
             padding: '0 13px 0 8px',
           },
           '.cm-activeLineGutter': {
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(124, 92, 255, .08)',
+            color: '#a99cff',
           },
           '.cm-algorithm-active-line': {
             background:
-              'linear-gradient(90deg, rgba(124, 92, 255, .28), rgba(124, 92, 255, .06))',
+              'linear-gradient(90deg, rgba(124, 92, 255, .30), rgba(56, 189, 248, .055))',
             boxShadow: 'inset 3px 0 0 #8b7bff',
           },
           '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-            backgroundColor: 'rgba(124, 92, 255, .25) !important',
+            backgroundColor: 'rgba(56, 189, 248, .20) !important',
           },
           '&.cm-focused': {
             outline: 'none',
@@ -119,6 +141,18 @@ export function CodePanel({ code, activeLine }: CodePanelProps) {
       view.destroy()
       editorViewRef.current = null
     }
+  }, [])
+
+  useEffect(() => {
+    const view = editorViewRef.current
+    if (!view) return
+
+    const currentDocument = view.state.doc.toString()
+    if (currentDocument !== code) {
+      view.dispatch({
+        changes: { from: 0, to: currentDocument.length, insert: code },
+      })
+    }
   }, [code])
 
   useEffect(() => {
@@ -127,12 +161,15 @@ export function CodePanel({ code, activeLine }: CodePanelProps) {
 
     const safeLine = Math.max(1, Math.min(activeLine, view.state.doc.lines))
     const line = view.state.doc.line(safeLine)
-    view.dispatch({
-      effects: [
-        setHighlightedLine.of(safeLine),
-        EditorView.scrollIntoView(line.from, { y: 'center' }),
-      ],
-    })
+    view.dispatch({ effects: setHighlightedLine.of(safeLine) })
+
+    // 只滚动 CodeMirror 自己的滚动容器，避免步骤切换带动整个网页。
+    const lineBlock = view.lineBlockAt(line.from)
+    const scroller = view.scrollDOM
+    const targetTop = Math.max(0, lineBlock.top - scroller.clientHeight * 0.42)
+    if (Math.abs(scroller.scrollTop - targetTop) > 2) {
+      scroller.scrollTo({ top: targetTop, behavior: 'smooth' })
+    }
   }, [activeLine])
 
   const copyCode = async () => {
@@ -144,26 +181,44 @@ export function CodePanel({ code, activeLine }: CodePanelProps) {
   return (
     <section className="panel flex min-h-[430px] flex-col overflow-hidden">
       <header className="panel-header">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-violet-500/10 text-violet-300">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-violet-500/10 text-violet-300">
             <Braces size={15} aria-hidden="true" />
           </span>
-          <div>
-            <div className="text-[12px] font-semibold text-slate-200">
-              solution.cpp
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-semibold text-slate-200">
+                solution.cpp
+              </span>
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-300">
+                可编辑
+              </span>
             </div>
-            <div className="text-[10px] text-slate-500">C++ · 展示代码</div>
+            <div className="truncate text-[9px] text-slate-500">
+              可直接输入 · 动画仍按原始行号执行
+            </div>
           </div>
         </div>
-        <button
-          className="icon-button"
-          type="button"
-          onClick={copyCode}
-          aria-label="复制 C++ 代码"
-          title="复制代码"
-        >
-          {copied ? <Check size={15} /> : <Copy size={15} />}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            className="icon-button"
+            type="button"
+            onClick={onResetCode}
+            aria-label="恢复标准 C++ 代码"
+            title="恢复标准代码"
+          >
+            <RotateCcw size={14} />
+          </button>
+          <button
+            className="icon-button"
+            type="button"
+            onClick={copyCode}
+            aria-label="复制 C++ 代码"
+            title="复制代码"
+          >
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+          </button>
+        </div>
       </header>
       <div className="min-h-0 flex-1" ref={editorHostRef} />
     </section>

@@ -6,6 +6,7 @@ import {
   Play,
   RotateCcw,
 } from 'lucide-react'
+import type { CSSProperties, MouseEvent } from 'react'
 
 interface PlaybackControlsProps {
   currentIndex: number
@@ -18,6 +19,11 @@ interface PlaybackControlsProps {
   onReset: () => void
   onSeek: (index: number) => void
   onSpeedChange: (speed: number) => void
+}
+
+const keepCurrentFocus = (event: MouseEvent<HTMLButtonElement>) => {
+  // 鼠标点击时不让按钮抢焦点，避免浏览器为了聚焦控件而调整页面位置。
+  event.preventDefault()
 }
 
 export function PlaybackControls({
@@ -37,13 +43,14 @@ export function PlaybackControls({
 
   return (
     <section
-      className="panel mt-3 flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center"
+      className="playback-dock panel mt-3 flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center"
       aria-label="动画播放控制"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <button
-          className="icon-button h-9 w-9"
+          className="icon-button h-10 w-10 shrink-0"
           type="button"
+          onMouseDown={keepCurrentFocus}
           onClick={onReset}
           disabled={isAtStart}
           aria-label="回到第一步"
@@ -51,43 +58,51 @@ export function PlaybackControls({
         >
           <RotateCcw size={16} />
         </button>
+
         <button
-          className="icon-button h-9 w-9"
+          className="step-button step-button-previous"
           type="button"
+          onMouseDown={keepCurrentFocus}
           onClick={onPrevious}
           disabled={isAtStart}
           aria-label="上一步"
           title="上一步（←）"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={18} strokeWidth={2.7} />
+          <span>上一步</span>
         </button>
+
         <button
-          className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500 text-white shadow-[0_0_24px_rgba(124,92,255,.28)] transition hover:bg-violet-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300"
+          className="play-control"
           type="button"
+          onMouseDown={keepCurrentFocus}
           onClick={onTogglePlayback}
           aria-label={isPlaying ? '暂停动画' : '播放动画'}
           title={isPlaying ? '暂停（空格）' : '播放（空格）'}
         >
           {isPlaying ? (
-            <Pause size={17} fill="currentColor" />
+            <Pause size={18} fill="currentColor" />
           ) : (
-            <Play size={17} fill="currentColor" className="translate-x-px" />
+            <Play size={18} fill="currentColor" className="translate-x-px" />
           )}
         </button>
+
         <button
-          className="icon-button h-9 w-9"
+          className="step-button step-button-next"
           type="button"
+          onMouseDown={keepCurrentFocus}
           onClick={onNext}
           disabled={isAtEnd}
           aria-label="下一步"
           title="下一步（→）"
         >
-          <ChevronRight size={18} />
+          <span>下一步</span>
+          <ChevronRight size={18} strokeWidth={2.7} />
         </button>
       </div>
 
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span className="w-12 shrink-0 font-mono text-[11px] text-slate-400">
+        <span className="w-12 shrink-0 font-mono text-[11px] font-semibold text-slate-300">
           {String(currentIndex + 1).padStart(2, '0')}/
           {String(totalSteps).padStart(2, '0')}
         </span>
@@ -105,7 +120,7 @@ export function PlaybackControls({
                 ? 0
                 : (currentIndex / (totalSteps - 1)) * 100
             }%`,
-          } as React.CSSProperties}
+          } as CSSProperties}
         />
       </div>
 

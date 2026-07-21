@@ -27,6 +27,7 @@ export function Visualizer<TSnapshot>({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
+  const [displayCode, setDisplayCode] = useState(sourceCode)
 
   const currentStep = steps[currentIndex]
   const isAtEnd = currentIndex >= steps.length - 1
@@ -35,6 +36,10 @@ export function Visualizer<TSnapshot>({
     setCurrentIndex(0)
     setIsPlaying(false)
   }, [steps, resetKey])
+
+  useEffect(() => {
+    setDisplayCode(sourceCode)
+  }, [sourceCode])
 
   useEffect(() => {
     if (!isPlaying) return
@@ -104,7 +109,12 @@ export function Visualizer<TSnapshot>({
   return (
     <>
       <div className="grid gap-3 xl:grid-cols-[minmax(380px,.83fr)_minmax(540px,1.17fr)]">
-        <CodePanel code={sourceCode} activeLine={currentStep.codeLine} />
+        <CodePanel
+          code={displayCode}
+          activeLine={currentStep.codeLine}
+          onCodeChange={setDisplayCode}
+          onResetCode={() => setDisplayCode(sourceCode)}
+        />
 
         <section className="panel flex min-h-[430px] flex-col overflow-hidden">
           <header className="panel-header">

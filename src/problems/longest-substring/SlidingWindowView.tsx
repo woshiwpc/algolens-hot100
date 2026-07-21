@@ -14,6 +14,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
     best,
     bestRange,
     lastSeen,
+    currentChar,
     duplicateIndex,
     windowLength,
     kind,
@@ -47,7 +48,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
         />
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-[#080d14] px-4 pb-4 pt-3.5">
+      <div className="rounded-2xl border border-sky-500/10 bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,.07),transparent_58%),#080d14] px-4 pb-4 pt-3.5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
             <ScanLine size={13} />
@@ -102,16 +103,30 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
                         borderColor: isDuplicate
                           ? '#fb7185'
                           : isRight
-                            ? '#67e8f9'
+                            ? '#38bdf8'
                             : isInWindow
-                              ? '#2f7084'
+                              ? '#256b85'
                               : '#263244',
                         backgroundColor: isDuplicate
-                          ? 'rgba(244,63,94,.16)'
+                          ? 'rgba(251,113,133,.18)'
+                          : isRight
+                            ? 'rgba(56,189,248,.18)'
+                            : isInWindow
+                              ? 'rgba(14,165,233,.105)'
+                              : 'rgba(15,23,42,.68)',
+                        boxShadow: isDuplicate
+                          ? '0 0 0 1px rgba(251,113,133,.16), 0 0 26px rgba(244,63,94,.24), inset 0 1px 0 rgba(255,255,255,.09)'
+                          : isRight
+                            ? '0 0 0 1px rgba(56,189,248,.16), 0 0 24px rgba(14,165,233,.22), inset 0 1px 0 rgba(255,255,255,.09)'
+                            : isInWindow
+                              ? 'inset 0 -18px 28px rgba(14,165,233,.11), inset 0 1px 0 rgba(255,255,255,.055)'
+                              : 'inset 0 1px 0 rgba(255,255,255,.025)',
+                        color: isDuplicate
+                          ? '#ffe4e6'
                           : isInWindow
-                            ? 'rgba(34,211,238,.11)'
-                            : 'rgba(15,23,42,.62)',
-                        y: isRight ? -2 : 0,
+                            ? '#f0f9ff'
+                            : '#cbd5e1',
+                        y: isRight ? -3 : 0,
                         scale: isDuplicate ? 1.06 : 1,
                       }}
                       transition={{
@@ -125,7 +140,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
                       {isInWindow && (
                         <motion.span
                           layoutId={`window-glow-${index}`}
-                          className="absolute inset-x-2 bottom-1 h-0.5 rounded-full bg-cyan-300/75"
+                          className="absolute inset-x-2 bottom-1 h-0.5 rounded-full bg-gradient-to-r from-sky-400 via-cyan-300 to-teal-300 shadow-[0_0_9px_rgba(103,232,249,.65)]"
                         />
                       )}
                     </motion.div>
@@ -161,7 +176,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[1.25fr_.75fr]">
-        <div className="rounded-2xl border border-slate-800 bg-[#080d14] p-3.5">
+        <div className="rounded-2xl border border-sky-500/10 bg-[linear-gradient(145deg,rgba(14,165,233,.035),transparent_55%),#080d14] p-3.5">
           <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
             <Hash size={13} />
             lastSeen 哈希表
@@ -185,12 +200,16 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
                       key={char}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/70 font-mono text-[11px]"
+                      className={`flex items-center overflow-hidden rounded-lg border font-mono text-[11px] transition-colors ${
+                        char === currentChar
+                          ? 'border-sky-400/45 bg-sky-500/12 shadow-[0_0_18px_rgba(14,165,233,.12)]'
+                          : 'border-slate-700/80 bg-slate-900/70'
+                      }`}
                     >
-                      <span className="border-r border-slate-700/80 px-2.5 py-1.5 text-slate-200">
+                      <span className="border-r border-slate-700/80 px-2.5 py-1.5 text-slate-100">
                         {char === ' ' ? '␠' : char}
                       </span>
-                      <span className="px-2 py-1.5 text-cyan-300">
+                      <span className="px-2 py-1.5 text-sky-300">
                         {index}
                       </span>
                     </motion.div>
@@ -230,14 +249,19 @@ interface MetricCardProps {
 }
 
 const accents = {
-  cyan: 'text-cyan-300 border-cyan-500/15 bg-cyan-500/[0.05]',
-  violet: 'text-violet-300 border-violet-500/15 bg-violet-500/[0.05]',
-  emerald: 'text-emerald-300 border-emerald-500/15 bg-emerald-500/[0.05]',
+  cyan:
+    'text-cyan-200 border-sky-400/20 bg-[linear-gradient(135deg,rgba(14,165,233,.12),rgba(34,211,238,.035))]',
+  violet:
+    'text-violet-200 border-violet-400/20 bg-[linear-gradient(135deg,rgba(124,92,255,.14),rgba(168,85,247,.035))]',
+  emerald:
+    'text-emerald-200 border-emerald-400/18 bg-[linear-gradient(135deg,rgba(16,185,129,.11),rgba(45,212,191,.03))]',
 }
 
 function MetricCard({ label, value, meta, accent }: MetricCardProps) {
   return (
-    <div className={`rounded-xl border px-3 py-2.5 ${accents[accent]}`}>
+    <div
+      className={`relative overflow-hidden rounded-xl border px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,.035)] ${accents[accent]}`}
+    >
       <div className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </div>
