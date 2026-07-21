@@ -114,38 +114,18 @@ function App() {
             <span className="text-[15px] font-bold tracking-tight">Algo<span className="text-violet-400">Lens</span></span>
           </button>
 
-          <div className="hidden h-5 w-px bg-slate-700 sm:block" />
-          <nav className="algorithm-scroll flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="算法分类">
-            {categories.map((category) => {
-              const Icon = categoryIcons[category] ?? CircleDot
-              const active = category === activeCategory || (activeCategory === '全部' && category === problem.category)
-              return (
-                <button
-                  key={category}
-                  className={`category-tab ${active ? 'category-tab-active' : ''}`}
-                  type="button"
-                  onClick={() => {
-                    setActiveCategory(category)
-                    setBrowserOpen(true)
-                  }}
-                >
-                  <Icon size={13} />
-                  {category}
-                </button>
-              )
-            })}
-          </nav>
-
+          <div className="flex-1" />
+          <span className="hidden text-[11px] font-semibold text-slate-400 sm:block">LeetCode Hot 100</span>
           <button
             type="button"
             onClick={() => {
               setActiveCategory('全部')
               setBrowserOpen(true)
             }}
-            className="hidden shrink-0 items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1.5 text-[10px] font-semibold text-violet-200 transition hover:bg-violet-500/15 lg:flex"
+            className="flex shrink-0 items-center gap-2 rounded-lg border border-violet-500/25 bg-violet-500/12 px-3 py-1.5 text-[10px] font-semibold text-violet-100 transition hover:bg-violet-500/18"
           >
             <ListFilter size={11} />
-            100 / 100
+            题库
           </button>
         </div>
       </header>
@@ -166,7 +146,7 @@ function App() {
               </div>
               <button type="button" onClick={() => setBrowserOpen(false)} className="icon-button" aria-label="关闭题库"><X size={15} /></button>
             </div>
-            <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+            <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1 md:hidden">
               {['全部', ...categories].map((category) => (
                 <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] font-semibold transition ${activeCategory === category ? 'border-violet-400/45 bg-violet-500/16 text-violet-100' : 'border-slate-600/70 text-slate-400 hover:text-slate-100'}`}>{category}</button>
               ))}
@@ -190,7 +170,32 @@ function App() {
         </section>
       )}
 
-      <main id="top" className="mx-auto max-w-[1600px] px-4 pb-7 pt-4 sm:px-6">
+      <div className="mx-auto flex max-w-[1600px] gap-4 px-4 sm:px-6">
+        <aside className="hidden w-[156px] shrink-0 md:block">
+          <nav className="algorithm-scroll sticky top-[76px] max-h-[calc(100vh-88px)] space-y-1 overflow-y-auto py-4 pr-1" aria-label="题目类型">
+            <div className="mb-2 px-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">题目类型</div>
+            {categories.map((category) => {
+              const Icon = categoryIcons[category] ?? CircleDot
+              const active = category === activeCategory || (activeCategory === '全部' && category === problem.category)
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory(category)
+                    setBrowserOpen(true)
+                  }}
+                  className={`flex h-9 w-full items-center gap-2 rounded-lg border px-2.5 text-left text-[10px] font-semibold transition ${active ? 'border-violet-400/40 bg-violet-500/16 text-violet-100' : 'border-transparent text-slate-400 hover:bg-slate-700/45 hover:text-slate-100'}`}
+                >
+                  <Icon size={13} className="shrink-0" />
+                  <span className="truncate">{category}</span>
+                </button>
+              )
+            })}
+          </nav>
+        </aside>
+
+        <main id="top" className="min-w-0 flex-1 pb-7 pt-4">
         <section className="mb-3 flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
@@ -243,7 +248,8 @@ function App() {
         </section>
 
         <ProblemPlayback problem={problem} activeInput={activeInput} sample={problem.examples[activeExampleIndex]} resetKey={resetKey} />
-      </main>
+        </main>
+      </div>
     </div>
   )
 }
