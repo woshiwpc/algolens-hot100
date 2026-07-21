@@ -118,9 +118,11 @@ button:disabled {
 
 .pointer-label {
   position: absolute;
-  left: 50%;
+  right: 0;
+  left: 0;
   z-index: 5;
-  transform: translateX(-50%);
+  width: max-content;
+  margin-inline: auto;
   border-radius: 5px;
   padding: 2px 5px;
   font-family: "JetBrains Mono", Consolas, monospace;
