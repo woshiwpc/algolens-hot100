@@ -22,6 +22,7 @@ export interface ProblemDefinition {
   pattern: string
   summary: string
   sample: string
+  examples: [string, string, string]
   visualKind: VisualKind
   sourceCode: string
 }

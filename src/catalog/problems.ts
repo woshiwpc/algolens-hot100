@@ -1,4 +1,5 @@
 import { solutions } from './solutions'
+import { extraExamples } from './examples'
 import type { Difficulty, ProblemDefinition, VisualKind } from './types'
 
 type RawProblem = readonly [
@@ -120,7 +121,9 @@ export const problems: ProblemDefinition[] = rawProblems.map((problem) => {
   const [id, title, slug, category, difficulty, pattern, summary, sample, visualKind] = problem
   const sourceCode = solutions[id]
   if (!sourceCode) throw new Error(`Missing C++ solution for LeetCode ${id}`)
-  return { id, title, slug, category, difficulty, pattern, summary, sample, visualKind, sourceCode }
+  const extras = extraExamples[id]
+  if (!extras) throw new Error(`Missing examples for LeetCode ${id}`)
+  return { id, title, slug, category, difficulty, pattern, summary, sample, examples: [sample, ...extras], visualKind, sourceCode }
 })
 
 export const categories = Array.from(new Set(problems.map((problem) => problem.category)))

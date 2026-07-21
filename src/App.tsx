@@ -55,6 +55,7 @@ function getInitialProblemId() {
 
 function App() {
   const [activeProblemId, setActiveProblemId] = useState(getInitialProblemId)
+  const [activeExampleIndex, setActiveExampleIndex] = useState(0)
   const [activeCategory, setActiveCategory] = useState('全部')
   const [browserOpen, setBrowserOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -75,6 +76,7 @@ function App() {
 
   const selectProblem = (selected: ProblemDefinition) => {
     setActiveProblemId(selected.id)
+    setActiveExampleIndex(0)
     setActiveCategory(selected.category)
     setBrowserOpen(false)
     setResetKey((key) => key + 1)
@@ -220,16 +222,41 @@ function App() {
               </form>
               <div className="mt-2 flex min-h-5 flex-wrap items-center gap-2">
                 <span className="text-[9px] text-slate-700">试试</span>
-                {['abcabcbb', 'pwwkew', 'bbbbb', 'dvdf'].map((preset) => <button key={preset} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/15 text-violet-300' : 'text-slate-600 hover:bg-slate-900 hover:text-slate-400'}`}>{preset}</button>)}
+                {problem.examples.map((example) => {
+                  const preset = example.match(/"([^"]*)"/)?.[1] ?? example
+                  return <button key={example} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/15 text-violet-300' : 'text-slate-600 hover:bg-slate-900 hover:text-slate-400'}`}>{preset || '空串'}</button>
+                })}
                 {inputError && <span className="text-[9px] text-rose-400">{inputError}</span>}
               </div>
             </div>
           ) : (
-            <button type="button" onClick={() => setBrowserOpen(true)} className="flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 text-[10px] font-semibold text-slate-400 transition hover:border-violet-500/35 hover:text-violet-200"><ListFilter size={13} />切换题目</button>
+            <div className="w-full lg:w-[470px]">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-600">选择演示示例</span>
+                <button type="button" onClick={() => setBrowserOpen(true)} className="flex items-center gap-1.5 text-[9px] text-slate-600 transition hover:text-violet-300"><ListFilter size={11} />切换题目</button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {problem.examples.map((example, index) => (
+                  <button
+                    key={example}
+                    type="button"
+                    onClick={() => {
+                      setActiveExampleIndex(index)
+                      setResetKey((key) => key + 1)
+                    }}
+                    title={example}
+                    className={`min-w-0 rounded-xl border px-2.5 py-2 text-left transition ${activeExampleIndex === index ? 'border-violet-500/45 bg-violet-500/12 text-violet-100' : 'border-slate-800 bg-slate-900/45 text-slate-500 hover:border-slate-700 hover:text-slate-300'}`}
+                  >
+                    <span className="block text-[8px] font-semibold uppercase tracking-[0.12em] opacity-60">示例 {index + 1}</span>
+                    <span className="mt-1 block truncate font-mono text-[9px]">{example}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </section>
 
-        <ProblemPlayback problem={problem} activeInput={activeInput} resetKey={resetKey} />
+        <ProblemPlayback problem={problem} activeInput={activeInput} sample={problem.examples[activeExampleIndex]} resetKey={resetKey} />
 
         <footer className="mt-4 flex flex-col gap-2 border-t border-slate-900 pt-4 text-[10px] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2"><Sparkles size={11} />100 道标准 C++ · 统一播放协议 · 11 类数据结构视图</div>
@@ -240,11 +267,11 @@ function App() {
   )
 }
 
-function ProblemPlayback({ problem, activeInput, resetKey }: { problem: ProblemDefinition; activeInput: string; resetKey: number }) {
+function ProblemPlayback({ problem, activeInput, sample, resetKey }: { problem: ProblemDefinition; activeInput: string; sample: string; resetKey: number }) {
   if (problem.id === 3) {
     return <LongestSubstringPlayback problem={problem} input={activeInput} resetKey={resetKey} />
   }
-  return <GenericPlayback problem={problem} resetKey={resetKey} />
+  return <GenericPlayback problem={problem} sample={sample} resetKey={resetKey} />
 }
 
 function LongestSubstringPlayback({ problem, input, resetKey }: { problem: ProblemDefinition; input: string; resetKey: number }) {
@@ -252,8 +279,8 @@ function LongestSubstringPlayback({ problem, input, resetKey }: { problem: Probl
   return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName="SlidingWindowView" renderSnapshot={(snapshot) => <SlidingWindowView snapshot={snapshot} />} />
 }
 
-function GenericPlayback({ problem, resetKey }: { problem: ProblemDefinition; resetKey: number }) {
-  const steps = useMemo(() => generateProblemSteps(problem), [problem])
+function GenericPlayback({ problem, sample, resetKey }: { problem: ProblemDefinition; sample: string; resetKey: number }) {
+  const steps = useMemo(() => generateProblemSteps(problem, sample), [problem, sample])
   return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName={`${problem.visualKind} · ${problem.pattern}`} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
 }
 
