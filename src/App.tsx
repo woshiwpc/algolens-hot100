@@ -2,7 +2,6 @@ import {
   Binary,
   Boxes,
   Braces,
-  ChevronRight,
   CircleDot,
   GitBranch,
   Grid3X3,
@@ -15,7 +14,6 @@ import {
   Route,
   Search,
   Sparkles,
-  TimerReset,
   X,
 } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
@@ -101,8 +99,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080b10] text-slate-300">
-      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#080b10]/92 backdrop-blur-xl">
+    <div className="min-h-screen bg-[#111827] text-slate-200">
+      <header className="sticky top-0 z-30 border-b border-slate-700/70 bg-[#131c2b]/94 backdrop-blur-xl">
         <div className="mx-auto flex h-15 max-w-[1600px] items-center gap-4 px-4 sm:px-6">
           <button
             type="button"
@@ -116,7 +114,7 @@ function App() {
             <span className="text-[15px] font-bold tracking-tight">Algo<span className="text-violet-400">Lens</span></span>
           </button>
 
-          <div className="hidden h-5 w-px bg-slate-800 sm:block" />
+          <div className="hidden h-5 w-px bg-slate-700 sm:block" />
           <nav className="algorithm-scroll flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="算法分类">
             {categories.map((category) => {
               const Icon = categoryIcons[category] ?? CircleDot
@@ -133,7 +131,6 @@ function App() {
                 >
                   <Icon size={13} />
                   {category}
-                  <span className="text-[8px] opacity-50">{problems.filter((item) => item.category === category).length}</span>
                 </button>
               )
             })}
@@ -154,16 +151,16 @@ function App() {
       </header>
 
       {browserOpen && (
-        <section className="sticky top-15 z-20 border-b border-slate-800 bg-[#0a0e14]/97 shadow-2xl backdrop-blur-xl">
+        <section className="sticky top-15 z-20 border-b border-slate-700/80 bg-[#182235]/97 shadow-xl backdrop-blur-xl">
           <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6">
             <div className="mb-3 flex items-center gap-3">
               <div className="relative min-w-0 flex-1">
-                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   autoFocus
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-800 bg-slate-950/70 pl-9 pr-3 text-[12px] text-slate-200 outline-none placeholder:text-slate-700 focus:border-violet-500/60"
+                  className="h-10 w-full rounded-xl border border-slate-600/70 bg-[#202c40] pl-9 pr-3 text-[12px] text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-400/70"
                   placeholder="搜索题号、题名、英文 slug 或算法模板"
                 />
               </div>
@@ -171,7 +168,7 @@ function App() {
             </div>
             <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
               {['全部', ...categories].map((category) => (
-                <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] font-semibold transition ${activeCategory === category ? 'border-violet-500/35 bg-violet-500/12 text-violet-200' : 'border-slate-800 text-slate-600 hover:text-slate-300'}`}>{category}</button>
+                <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] font-semibold transition ${activeCategory === category ? 'border-violet-400/45 bg-violet-500/16 text-violet-100' : 'border-slate-600/70 text-slate-400 hover:text-slate-100'}`}>{category}</button>
               ))}
             </div>
             <div className="grid max-h-[48vh] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -180,12 +177,11 @@ function App() {
                   key={candidate.id}
                   type="button"
                   onClick={() => selectProblem(candidate)}
-                  className={`group flex min-h-17 items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${candidate.id === problem.id ? 'border-violet-500/45 bg-violet-500/10' : 'border-slate-800 bg-slate-950/35 hover:border-slate-700 hover:bg-slate-900/70'}`}
+                  className={`group flex min-h-13 items-center gap-3 rounded-xl border px-3 py-2 text-left transition ${candidate.id === problem.id ? 'border-violet-400/50 bg-violet-500/14' : 'border-slate-600/60 bg-[#202c40]/70 hover:border-slate-500 hover:bg-[#253249]'}`}
                 >
-                  <span className="grid h-8 w-10 shrink-0 place-items-center rounded-lg bg-slate-900 font-mono text-[10px] font-bold text-slate-500 group-hover:text-violet-300">{candidate.id}</span>
+                  <span className="grid h-8 w-10 shrink-0 place-items-center rounded-lg bg-[#29364c] font-mono text-[10px] font-bold text-slate-300 group-hover:text-violet-200">{candidate.id}</span>
                   <span className="min-w-0">
                     <span className="block truncate text-[11px] font-semibold text-slate-200">{candidate.title}</span>
-                    <span className="mt-1 block truncate text-[9px] text-slate-600">{candidate.category} · {candidate.pattern}</span>
                   </span>
                 </button>
               ))}
@@ -194,20 +190,15 @@ function App() {
         </section>
       )}
 
-      <main id="top" className="mx-auto max-w-[1600px] px-4 pb-8 pt-5 sm:px-6">
-        <section className="mb-4 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+      <main id="top" className="mx-auto max-w-[1600px] px-4 pb-7 pt-4 sm:px-6">
+        <section className="mb-3 flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
           <div className="min-w-0">
-            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-              <button type="button" onClick={() => { setActiveCategory('全部'); setBrowserOpen(true) }} className="transition hover:text-violet-300">Hot 100</button>
-              <ChevronRight size={11} />
-              <button type="button" onClick={() => { setActiveCategory(problem.category); setBrowserOpen(true) }} className="text-violet-400 transition hover:text-violet-300">{problem.category}</button>
-            </div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-[22px] font-bold tracking-tight text-slate-100 sm:text-[25px]">{problem.id}. {problem.title}</h1>
+              <button type="button" onClick={() => { setActiveCategory(problem.category); setBrowserOpen(true) }} className="rounded-md bg-violet-500/14 px-2 py-1 text-[9px] font-semibold text-violet-200 transition hover:bg-violet-500/20">{problem.category}</button>
+              <h1 className="text-[20px] font-bold tracking-tight text-white sm:text-[22px]">{problem.id}. {problem.title}</h1>
               <DifficultyBadge difficulty={problem.difficulty} />
-              <span className="rounded-md border border-slate-800 bg-slate-900/60 px-2 py-1 font-mono text-[10px] text-slate-500">{problem.pattern}</span>
+              <span className="rounded-md border border-slate-600/60 bg-[#202c40] px-2 py-1 font-mono text-[9px] text-slate-300">{problem.pattern}</span>
             </div>
-            <p className="mt-2 max-w-3xl text-[12px] leading-5 text-slate-500">{problem.summary}</p>
           </div>
 
           {problem.id === 3 ? (
@@ -215,27 +206,22 @@ function App() {
               <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 lg:w-auto">
                 <label className="sr-only" htmlFor="custom-input">自定义测试字符串</label>
                 <div className="relative min-w-0 flex-1 lg:w-[310px] lg:flex-none">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
-                  <input id="custom-input" className="h-10 w-full rounded-xl border border-slate-800 bg-[#0d131c] pl-9 pr-3 font-mono text-[12px] text-slate-200 outline-none transition placeholder:text-slate-700 focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/10" value={draftInput} onChange={(event) => { setDraftInput(event.target.value); setInputError('') }} placeholder="输入测试字符串，例如 pwwkew" spellCheck={false} />
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input id="custom-input" className="h-10 w-full rounded-xl border border-slate-600/70 bg-[#202c40] pl-9 pr-3 font-mono text-[12px] text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-violet-400/70 focus:ring-2 focus:ring-violet-500/10" value={draftInput} onChange={(event) => { setDraftInput(event.target.value); setInputError('') }} placeholder="输入字符串" spellCheck={false} />
                 </div>
                 <button className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-slate-100 px-4 text-[11px] font-bold text-slate-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" type="submit"><Play size={13} fill="currentColor" />重新运行</button>
               </form>
               <div className="mt-2 flex min-h-5 flex-wrap items-center gap-2">
-                <span className="text-[9px] text-slate-700">试试</span>
                 {problem.examples.map((example) => {
                   const preset = example.match(/"([^"]*)"/)?.[1] ?? example
-                  return <button key={example} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/15 text-violet-300' : 'text-slate-600 hover:bg-slate-900 hover:text-slate-400'}`}>{preset || '空串'}</button>
+                  return <button key={example} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/20 text-violet-200' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-100'}`}>{preset || '空串'}</button>
                 })}
                 {inputError && <span className="text-[9px] text-rose-400">{inputError}</span>}
               </div>
             </div>
           ) : (
             <div className="w-full lg:w-[470px]">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-600">选择演示示例</span>
-                <button type="button" onClick={() => setBrowserOpen(true)} className="flex items-center gap-1.5 text-[9px] text-slate-600 transition hover:text-violet-300"><ListFilter size={11} />切换题目</button>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center justify-end gap-2">
                 {problem.examples.map((example, index) => (
                   <button
                     key={example}
@@ -245,23 +231,18 @@ function App() {
                       setResetKey((key) => key + 1)
                     }}
                     title={example}
-                    className={`min-w-0 rounded-xl border px-2.5 py-2 text-left transition ${activeExampleIndex === index ? 'border-violet-500/45 bg-violet-500/12 text-violet-100' : 'border-slate-800 bg-slate-900/45 text-slate-500 hover:border-slate-700 hover:text-slate-300'}`}
+                    className={`h-9 rounded-lg border px-3 text-[10px] font-semibold transition ${activeExampleIndex === index ? 'border-violet-400/55 bg-violet-500/18 text-violet-100' : 'border-slate-600/70 bg-[#202c40] text-slate-400 hover:border-slate-500 hover:text-slate-100'}`}
                   >
-                    <span className="block text-[8px] font-semibold uppercase tracking-[0.12em] opacity-60">示例 {index + 1}</span>
-                    <span className="mt-1 block truncate font-mono text-[9px]">{example}</span>
+                    示例 {index + 1}
                   </button>
                 ))}
+                <button type="button" onClick={() => setBrowserOpen(true)} className="icon-button" aria-label="切换题目" title="切换题目"><ListFilter size={13} /></button>
               </div>
             </div>
           )}
         </section>
 
         <ProblemPlayback problem={problem} activeInput={activeInput} sample={problem.examples[activeExampleIndex]} resetKey={resetKey} />
-
-        <footer className="mt-4 flex flex-col gap-2 border-t border-slate-900 pt-4 text-[10px] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2"><Sparkles size={11} />100 道标准 C++ · 统一播放协议 · 11 类数据结构视图</div>
-          <div className="flex items-center gap-4"><span className="flex items-center gap-1.5"><TimerReset size={11} />空格 播放/暂停</span><span>← → 单步切换</span></div>
-        </footer>
       </main>
     </div>
   )
@@ -281,7 +262,7 @@ function LongestSubstringPlayback({ problem, input, resetKey }: { problem: Probl
 
 function GenericPlayback({ problem, sample, resetKey }: { problem: ProblemDefinition; sample: string; resetKey: number }) {
   const steps = useMemo(() => generateProblemSteps(problem, sample), [problem, sample])
-  return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName={`${problem.visualKind} · ${problem.pattern}`} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
+  return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName={problem.pattern} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: ProblemDefinition['difficulty'] }) {

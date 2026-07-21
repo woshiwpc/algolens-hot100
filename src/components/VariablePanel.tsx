@@ -1,5 +1,3 @@
-import { Braces } from 'lucide-react'
-
 interface VariablePanelProps {
   variables: Record<string, unknown>
 }
@@ -14,24 +12,19 @@ const formatValue = (value: unknown) => {
 export function VariablePanel({ variables }: VariablePanelProps) {
   return (
     <section
-      className="border-t border-slate-800/90 bg-[#0a0f16] px-4 py-3.5"
+      className="border-t border-slate-600/60 bg-[#1a2639] px-4 py-2.5"
       aria-label="当前变量"
     >
-      <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-        <Braces size={12} />
-        Variables
-      </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+      <div className="flex flex-wrap gap-1.5">
         {Object.entries(variables).map(([key, value]) => (
           <div
-            className="rounded-xl border border-slate-800 bg-slate-950/55 px-3 py-2"
+            className="flex min-w-0 items-center gap-1.5 rounded-lg border border-slate-600/55 bg-[#243249] px-2.5 py-1.5"
             key={key}
           >
-            <div className="truncate font-mono text-[10px] text-slate-500">
-              {key}
-            </div>
+            <span className="truncate font-mono text-[9px] text-slate-400">{key}</span>
+            <span className="text-slate-500">=</span>
             <div
-              className="mt-0.5 truncate font-mono text-[13px] font-semibold text-cyan-300"
+              className="max-w-40 truncate font-mono text-[10px] font-semibold text-cyan-200"
               title={formatValue(value)}
             >
               {formatValue(value)}

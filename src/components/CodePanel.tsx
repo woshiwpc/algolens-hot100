@@ -86,7 +86,7 @@ export function CodePanel({
         EditorView.theme({
           '&': {
             height: '100%',
-            backgroundColor: '#0b1018',
+            backgroundColor: '#172235',
             fontSize: '13px',
           },
           '.cm-scroller': {
@@ -104,9 +104,9 @@ export function CodePanel({
             borderLeftColor: '#c4b5fd',
           },
           '.cm-gutters': {
-            backgroundColor: '#0b1018',
-            color: '#445064',
-            borderRight: '1px solid #192231',
+            backgroundColor: '#172235',
+            color: '#718096',
+            borderRight: '1px solid #2b3a51',
             minWidth: '48px',
           },
           '.cm-lineNumbers .cm-gutterElement': {
@@ -181,23 +181,12 @@ export function CodePanel({
   return (
     <section className="panel flex min-h-[430px] flex-col overflow-hidden">
       <header className="panel-header">
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2">
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-violet-500/10 text-violet-300">
             <Braces size={15} aria-hidden="true" />
           </span>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[12px] font-semibold text-slate-200">
-                solution.cpp
-              </span>
-              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-300">
-                可编辑
-              </span>
-            </div>
-            <div className="truncate text-[9px] text-slate-500">
-              可直接输入 · 动画仍按原始行号执行
-            </div>
-          </div>
+          <span className="text-[12px] font-semibold text-slate-100">C++ 代码</span>
+          <span className="rounded-full bg-emerald-400/12 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-200">可编辑</span>
         </div>
         <div className="flex items-center gap-1.5">
           <button

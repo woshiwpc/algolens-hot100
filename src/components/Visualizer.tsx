@@ -1,4 +1,4 @@
-import { Lightbulb, Radio } from 'lucide-react'
+import { Radio } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -131,36 +131,17 @@ export function Visualizer<TSnapshot>({
                   }`}
                 />
               </span>
-              <div>
-                <div className="text-[12px] font-semibold text-slate-200">
-                  {viewName}
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  标准代码 → 状态快照 → 动画
-                </div>
-              </div>
+              <div className="text-[12px] font-semibold text-slate-100">{viewName}</div>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-950/60 px-2.5 py-1 font-mono text-[10px] text-slate-400">
+            <div className="flex items-center gap-1.5 rounded-full border border-slate-600/70 bg-[#26344a] px-2.5 py-1 font-mono text-[10px] text-slate-300">
               <Radio size={10} />
               line {currentStep.codeLine}
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-auto px-4 py-4 sm:px-5">
-            <div className="mb-4 flex gap-3 rounded-2xl border border-violet-500/15 bg-violet-500/[0.06] px-4 py-3">
-              <Lightbulb
-                size={16}
-                className="mt-0.5 shrink-0 text-amber-300"
-                aria-hidden="true"
-              />
-              <div>
-                <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-300">
-                  这一步为什么
-                </div>
-                <p className="text-[12px] leading-5 text-slate-300">
-                  {currentStep.description}
-                </p>
-              </div>
+          <div className="min-h-0 flex-1 overflow-auto px-4 py-3.5 sm:px-5">
+            <div className="mb-3 rounded-xl border-l-2 border-violet-400 bg-[#202c40] px-3.5 py-2.5">
+              <p className="text-[11px] leading-5 text-slate-200">{currentStep.description}</p>
             </div>
             {visual}
           </div>

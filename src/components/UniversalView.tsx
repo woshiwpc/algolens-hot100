@@ -16,15 +16,9 @@ const pointerColors: Record<string, string> = {
 export function UniversalView({ snapshot }: UniversalViewProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-950/40 px-3.5 py-2.5">
-        <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-600">默认演示输入</div>
-          <div className="mt-1 truncate font-mono text-[11px] text-slate-300" title={snapshot.sample}>{snapshot.sample}</div>
-        </div>
-        <div className="flex items-center gap-2 text-[10px] text-slate-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-          {snapshot.title}
-        </div>
+      <div className="flex min-w-0 items-center gap-2 rounded-lg border border-slate-600/55 bg-[#243249] px-3 py-2">
+        <span className="shrink-0 text-[9px] font-semibold text-slate-400">输入</span>
+        <code className="truncate text-[10px] text-slate-200" title={snapshot.sample}>{snapshot.sample}</code>
       </div>
 
       {(snapshot.kind === 'array' || snapshot.kind === 'window' || snapshot.kind === 'binary-search') && <ArrayScene snapshot={snapshot} />}
@@ -52,7 +46,7 @@ function ArrayScene({ snapshot }: UniversalViewProps) {
   const left = snapshot.pointers.left ?? snapshot.pointers.current
   const right = snapshot.pointers.right ?? snapshot.pointers.current
   return (
-    <div className="rounded-2xl border border-slate-800 bg-[#0a0f16] px-3 py-8 sm:px-5">
+    <div className="rounded-xl border border-slate-600/60 bg-[#1b273a] px-3 py-8 sm:px-5">
       <div className="flex min-w-max justify-center gap-1.5 overflow-visible">
         {snapshot.values.map((value, index) => {
           const inRange = left !== undefined && right !== undefined && index >= left && index <= right
@@ -70,11 +64,11 @@ function ArrayScene({ snapshot }: UniversalViewProps) {
                 animate={{
                   y: isActive ? -4 : 0,
                   borderColor: isActive ? 'rgba(34,211,238,.8)' : inRange ? 'rgba(139,92,246,.5)' : 'rgba(51,65,85,.9)',
-                  backgroundColor: isActive ? 'rgba(8,145,178,.24)' : inRange ? 'rgba(124,58,237,.13)' : 'rgba(15,23,42,.72)',
+                  backgroundColor: isActive ? 'rgba(8,145,178,.28)' : inRange ? 'rgba(124,58,237,.18)' : 'rgba(37,50,73,.9)',
                 }}
                 className="grid h-12 min-w-11 place-items-center rounded-xl border px-2 font-mono text-[13px] font-bold text-slate-100 shadow-lg"
               >{value}</motion.div>
-              <span className="absolute inset-x-0 bottom-1 text-center font-mono text-[8px] text-slate-700">{index}</span>
+              <span className="absolute inset-x-0 bottom-1 text-center font-mono text-[8px] text-slate-500">{index}</span>
             </motion.div>
           )
         })}
@@ -86,7 +80,7 @@ function ArrayScene({ snapshot }: UniversalViewProps) {
 function MatrixScene({ snapshot }: UniversalViewProps) {
   let flatIndex = -1
   return (
-    <div className="grid place-items-center rounded-2xl border border-slate-800 bg-[#0a0f16] p-5">
+    <div className="grid place-items-center rounded-xl border border-slate-600/60 bg-[#1b273a] p-5">
       <div className="space-y-1.5">
         {snapshot.matrix.map((row, rowIndex) => (
           <div className="flex gap-1.5" key={rowIndex}>
@@ -98,8 +92,8 @@ function MatrixScene({ snapshot }: UniversalViewProps) {
               return (
                 <motion.div
                   key={`${rowIndex}-${colIndex}`}
-                  animate={{ scale: active ? 1.08 : 1, backgroundColor: active ? 'rgba(6,182,212,.28)' : visited ? 'rgba(124,58,237,.13)' : 'rgba(15,23,42,.75)' }}
-                  className={`grid h-11 w-11 place-items-center rounded-lg border font-mono text-xs ${active ? 'border-cyan-400/70 text-cyan-100' : visited ? 'border-violet-500/35 text-violet-200' : 'border-slate-800 text-slate-400'}`}
+                  animate={{ scale: active ? 1.08 : 1, backgroundColor: active ? 'rgba(6,182,212,.30)' : visited ? 'rgba(124,58,237,.18)' : 'rgba(37,50,73,.92)' }}
+                  className={`grid h-11 w-11 place-items-center rounded-lg border font-mono text-xs ${active ? 'border-cyan-400/70 text-cyan-100' : visited ? 'border-violet-400/45 text-violet-100' : 'border-slate-600 text-slate-300'}`}
                 >{value}</motion.div>
               )
             })}
@@ -113,21 +107,21 @@ function MatrixScene({ snapshot }: UniversalViewProps) {
 function LinkedListScene({ snapshot }: UniversalViewProps) {
   const active = snapshot.active[0] ?? 0
   return (
-    <div className="flex min-h-48 items-center overflow-x-auto rounded-2xl border border-slate-800 bg-[#0a0f16] px-5 py-7">
+    <div className="flex min-h-48 items-center overflow-x-auto rounded-xl border border-slate-600/60 bg-[#1b273a] px-5 py-7">
       <div className="mx-auto flex min-w-max items-center">
         {snapshot.values.slice(0, 8).map((value, index) => (
           <div className="flex items-center" key={`${value}-${index}`}>
             <motion.div
               animate={{ y: index === active ? -7 : 0, scale: index === active ? 1.06 : 1 }}
-              className={`relative grid h-13 w-13 place-items-center rounded-xl border font-mono text-sm font-bold ${index === active ? 'border-cyan-400/70 bg-cyan-500/15 text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,.12)]' : snapshot.visited.includes(index) ? 'border-violet-500/35 bg-violet-500/10 text-violet-200' : 'border-slate-700 bg-slate-900 text-slate-300'}`}
+              className={`relative grid h-13 w-13 place-items-center rounded-xl border font-mono text-sm font-bold ${index === active ? 'border-cyan-400/70 bg-cyan-500/20 text-cyan-50 shadow-[0_0_24px_rgba(34,211,238,.12)]' : snapshot.visited.includes(index) ? 'border-violet-400/45 bg-violet-500/16 text-violet-100' : 'border-slate-600 bg-[#28364c] text-slate-200'}`}
             >
               {value}
-              <span className="absolute -bottom-5 text-[8px] font-normal text-slate-700">node {index}</span>
+              <span className="absolute -bottom-5 text-[8px] font-normal text-slate-500">{index}</span>
             </motion.div>
             {index < snapshot.values.slice(0, 8).length - 1 && <ArrowRight size={19} className="mx-2 text-slate-600" />}
           </div>
         ))}
-        <span className="ml-3 font-mono text-[10px] text-slate-700">null</span>
+        <span className="ml-3 font-mono text-[10px] text-slate-500">null</span>
       </div>
     </div>
   )
@@ -137,8 +131,8 @@ function NodeScene({ snapshot }: UniversalViewProps) {
   const path = new Set(snapshot.path)
   const byId = new Map(snapshot.nodes.map((node) => [node.id, node]))
   return (
-    <div className="relative min-h-64 overflow-hidden rounded-2xl border border-slate-800 bg-[#0a0f16]">
-      <div className="absolute left-3 top-3 flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-slate-600">
+    <div className="relative min-h-64 overflow-hidden rounded-xl border border-slate-600/60 bg-[#1b273a]">
+      <div className="absolute left-3 top-3 flex items-center gap-2 text-[9px] uppercase tracking-[0.14em] text-slate-400">
         {snapshot.kind === 'graph' ? <GitBranch size={11} /> : <Layers3 size={11} />}
         {snapshot.kind}
       </div>
@@ -156,7 +150,7 @@ function NodeScene({ snapshot }: UniversalViewProps) {
           <motion.div
             key={node.id}
             animate={{ scale: active ? 1.12 : 1, y: active ? -2 : 0 }}
-            className={`absolute grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border font-mono text-[11px] font-bold ${active ? 'border-cyan-300 bg-cyan-500/25 text-cyan-50 shadow-[0_0_28px_rgba(34,211,238,.2)]' : path.has(node.id) ? 'border-violet-400/55 bg-violet-500/18 text-violet-100' : 'border-slate-700 bg-slate-900 text-slate-400'}`}
+            className={`absolute grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border font-mono text-[11px] font-bold ${active ? 'border-cyan-300 bg-cyan-500/30 text-cyan-50 shadow-[0_0_28px_rgba(34,211,238,.2)]' : path.has(node.id) ? 'border-violet-400/60 bg-violet-500/22 text-violet-50' : 'border-slate-600 bg-[#29374d] text-slate-300'}`}
             style={{ left: `${node.x}%`, top: `${node.y}%` }}
           >{node.label}</motion.div>
         )
@@ -167,7 +161,7 @@ function NodeScene({ snapshot }: UniversalViewProps) {
 
 function StackScene({ snapshot }: UniversalViewProps) {
   return (
-    <div className="grid min-h-60 place-items-center rounded-2xl border border-slate-800 bg-[#0a0f16] p-5">
+    <div className="grid min-h-60 place-items-center rounded-xl border border-slate-600/60 bg-[#1b273a] p-5">
       <div className="w-40 border-b-2 border-x-2 border-slate-700 px-2 pb-2 pt-8">
         <div className="flex flex-col-reverse gap-1.5">
           {snapshot.stack.map((value, index) => (
@@ -181,12 +175,12 @@ function StackScene({ snapshot }: UniversalViewProps) {
 
 function DpScene({ snapshot }: UniversalViewProps) {
   return (
-    <div className="overflow-auto rounded-2xl border border-slate-800 bg-[#0a0f16] p-4">
+    <div className="overflow-auto rounded-xl border border-slate-600/60 bg-[#1b273a] p-4">
       <div className="mx-auto grid w-max grid-cols-6 gap-1.5">
         {snapshot.table.flat().map((value, index) => {
           const filled = value !== '·'
           const newest = filled && (snapshot.table.flat()[index + 1] === '·' || index === snapshot.table.flat().length - 1)
-          return <motion.div key={index} animate={{ scale: newest ? 1.08 : 1 }} className={`grid h-10 w-10 place-items-center rounded-lg border font-mono text-[11px] ${newest ? 'border-cyan-300/70 bg-cyan-500/20 text-cyan-100' : filled ? 'border-violet-500/30 bg-violet-500/10 text-violet-200' : 'border-slate-800 bg-slate-950/70 text-slate-700'}`}>{value}</motion.div>
+          return <motion.div key={index} animate={{ scale: newest ? 1.08 : 1 }} className={`grid h-10 w-10 place-items-center rounded-lg border font-mono text-[11px] ${newest ? 'border-cyan-300/70 bg-cyan-500/25 text-cyan-50' : filled ? 'border-violet-400/40 bg-violet-500/16 text-violet-100' : 'border-slate-600/70 bg-[#253249] text-slate-500'}`}>{value}</motion.div>
         })}
       </div>
     </div>

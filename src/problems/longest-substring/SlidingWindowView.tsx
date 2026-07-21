@@ -48,7 +48,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
         />
       </div>
 
-      <div className="rounded-2xl border border-sky-500/10 bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,.07),transparent_58%),#080d14] px-4 pb-4 pt-3.5">
+      <div className="rounded-xl border border-slate-600/60 bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,.11),transparent_58%),#1b273a] px-4 pb-4 pt-3.5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
             <ScanLine size={13} />
@@ -62,7 +62,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
 
         <div className="algorithm-scroll overflow-x-auto pb-1 pt-8">
           {chars.length === 0 ? (
-            <div className="grid min-h-28 place-items-center rounded-xl border border-dashed border-slate-800 text-[12px] text-slate-500">
+            <div className="grid min-h-28 place-items-center rounded-xl border border-dashed border-slate-600 text-[12px] text-slate-400">
               输入为空，答案直接是 0
             </div>
           ) : (
@@ -145,7 +145,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
                       )}
                     </motion.div>
 
-                    <div className="mt-1.5 text-center font-mono text-[9px] text-slate-600">
+                    <div className="mt-1.5 text-center font-mono text-[9px] text-slate-500">
                       {index}
                     </div>
 
@@ -176,7 +176,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[1.25fr_.75fr]">
-        <div className="rounded-2xl border border-sky-500/10 bg-[linear-gradient(145deg,rgba(14,165,233,.035),transparent_55%),#080d14] p-3.5">
+        <div className="rounded-xl border border-slate-600/60 bg-[linear-gradient(145deg,rgba(14,165,233,.06),transparent_55%),#1b273a] p-3.5">
           <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
             <Hash size={13} />
             lastSeen 哈希表
@@ -203,7 +203,7 @@ export function SlidingWindowView({ snapshot }: SlidingWindowViewProps) {
                       className={`flex items-center overflow-hidden rounded-lg border font-mono text-[11px] transition-colors ${
                         char === currentChar
                           ? 'border-sky-400/45 bg-sky-500/12 shadow-[0_0_18px_rgba(14,165,233,.12)]'
-                          : 'border-slate-700/80 bg-slate-900/70'
+                          : 'border-slate-600/80 bg-[#29364c]'
                       }`}
                     >
                       <span className="border-r border-slate-700/80 px-2.5 py-1.5 text-slate-100">
