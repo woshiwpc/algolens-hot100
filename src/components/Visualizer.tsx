@@ -16,6 +16,7 @@ interface VisualizerProps<TSnapshot> {
   sourceCode: string
   resetKey: number
   renderSnapshot: (snapshot: TSnapshot) => ReactNode
+  viewName?: string
 }
 
 export function Visualizer<TSnapshot>({
@@ -23,6 +24,7 @@ export function Visualizer<TSnapshot>({
   sourceCode,
   resetKey,
   renderSnapshot,
+  viewName = 'AlgorithmView',
 }: VisualizerProps<TSnapshot>) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -131,10 +133,10 @@ export function Visualizer<TSnapshot>({
               </span>
               <div>
                 <div className="text-[12px] font-semibold text-slate-200">
-                  SlidingWindowView
+                  {viewName}
                 </div>
                 <div className="text-[10px] text-slate-500">
-                  snapshot → 画面
+                  标准代码 → 状态快照 → 动画
                 </div>
               </div>
             </div>

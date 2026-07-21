@@ -1,11 +1,14 @@
 import {
   Binary,
+  Boxes,
   Braces,
   ChevronRight,
   CircleDot,
   GitBranch,
+  Grid3X3,
   Hash,
   Layers3,
+  ListFilter,
   ListTree,
   Network,
   Play,
@@ -13,30 +16,77 @@ import {
   Search,
   Sparkles,
   TimerReset,
+  X,
 } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
+import type { ProblemDefinition } from './catalog/types'
+import { categories, problems, problemsById } from './catalog/problems'
+import { generateProblemSteps } from './catalog/generateSteps'
+import { UniversalView } from './components/UniversalView'
 import { Visualizer } from './components/Visualizer'
 import { SlidingWindowView } from './problems/longest-substring/SlidingWindowView'
-import solutionCode from './problems/longest-substring/solution.cpp?raw'
 import { generateLongestSubstringSteps } from './problems/longest-substring/steps'
 
+const categoryIcons: Record<string, typeof Hash> = {
+  哈希: Hash,
+  双指针: Route,
+  滑动窗口: Boxes,
+  子串: Braces,
+  普通数组: Grid3X3,
+  矩阵: Grid3X3,
+  链表: GitBranch,
+  二叉树: Binary,
+  图论: Network,
+  回溯: ListTree,
+  二分查找: Search,
+  栈: Braces,
+  堆: Layers3,
+  贪心算法: CircleDot,
+  动态规划: Layers3,
+  多维动态规划: Grid3X3,
+  技巧: Sparkles,
+}
+
+function getInitialProblemId() {
+  if (typeof window === 'undefined') return 3
+  const id = Number(window.location.hash.match(/problem-(\d+)/)?.[1])
+  return problemsById.has(id) ? id : 3
+}
+
 function App() {
+  const [activeProblemId, setActiveProblemId] = useState(getInitialProblemId)
+  const [activeCategory, setActiveCategory] = useState('全部')
+  const [browserOpen, setBrowserOpen] = useState(false)
+  const [query, setQuery] = useState('')
   const [draftInput, setDraftInput] = useState('abcabcbb')
   const [activeInput, setActiveInput] = useState('abcabcbb')
   const [resetKey, setResetKey] = useState(0)
   const [inputError, setInputError] = useState('')
 
-  const steps = useMemo(
-    () => generateLongestSubstringSteps(activeInput),
-    [activeInput],
-  )
+  const problem = problemsById.get(activeProblemId) ?? problems[0]
+  const filteredProblems = useMemo(() => {
+    const keyword = query.trim().toLowerCase()
+    return problems.filter((candidate) => {
+      const inCategory = activeCategory === '全部' || candidate.category === activeCategory
+      const searchable = `${candidate.id} ${candidate.title} ${candidate.slug} ${candidate.pattern}`.toLowerCase()
+      return inCategory && (!keyword || searchable.includes(keyword))
+    })
+  }, [activeCategory, query])
+
+  const selectProblem = (selected: ProblemDefinition) => {
+    setActiveProblemId(selected.id)
+    setActiveCategory(selected.category)
+    setBrowserOpen(false)
+    setResetKey((key) => key + 1)
+    window.history.replaceState(null, '', `#problem-${selected.id}`)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
 
   const runWithInput = (value: string) => {
     if (Array.from(value).length > 18) {
       setInputError('为保证动画清晰，请输入不超过 18 个字符。')
       return
     }
-
     setInputError('')
     setDraftInput(value)
     setActiveInput(value)
@@ -50,182 +100,170 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#080b10] text-slate-300">
-      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#080b10]/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-15 max-w-[1540px] items-center gap-5 px-4 sm:px-6">
-          <a
-            href="#top"
+      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-[#080b10]/92 backdrop-blur-xl">
+        <div className="mx-auto flex h-15 max-w-[1600px] items-center gap-4 px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setBrowserOpen((open) => !open)}
             className="flex shrink-0 items-center gap-2.5 text-slate-100"
-            aria-label="AlgoLens 首页"
+            aria-label="打开 Hot 100 题库"
           >
             <span className="grid h-8 w-8 place-items-center rounded-[10px] bg-violet-500 text-white shadow-[0_0_25px_rgba(124,92,255,.22)]">
               <Braces size={17} strokeWidth={2.4} />
             </span>
-            <span className="text-[15px] font-bold tracking-tight">
-              Algo<span className="text-violet-400">Lens</span>
-            </span>
-          </a>
+            <span className="text-[15px] font-bold tracking-tight">Algo<span className="text-violet-400">Lens</span></span>
+          </button>
 
           <div className="hidden h-5 w-px bg-slate-800 sm:block" />
-          <nav
-            className="algorithm-scroll flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
-            aria-label="算法分类"
-          >
-            {categories.map((category) => (
-              <button
-                key={category.name}
-                className={`category-tab ${
-                  category.active ? 'category-tab-active' : ''
-                }`}
-                type="button"
-                aria-current={category.active ? 'page' : undefined}
-                title={category.active ? category.name : `${category.name} · 待添加`}
-              >
-                <category.icon size={13} />
-                {category.name}
-                {!category.active && (
-                  <span className="h-1 w-1 rounded-full bg-slate-700" />
-                )}
-              </button>
-            ))}
+          <nav className="algorithm-scroll flex min-w-0 flex-1 items-center gap-1 overflow-x-auto" aria-label="算法分类">
+            {categories.map((category) => {
+              const Icon = categoryIcons[category] ?? CircleDot
+              const active = category === activeCategory || (activeCategory === '全部' && category === problem.category)
+              return (
+                <button
+                  key={category}
+                  className={`category-tab ${active ? 'category-tab-active' : ''}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveCategory(category)
+                    setBrowserOpen(true)
+                  }}
+                >
+                  <Icon size={13} />
+                  {category}
+                  <span className="text-[8px] opacity-50">{problems.filter((item) => item.category === category).length}</span>
+                </button>
+              )
+            })}
           </nav>
 
-          <div className="hidden shrink-0 items-center gap-2 rounded-full border border-slate-800 bg-slate-900/50 px-3 py-1.5 text-[10px] text-slate-500 lg:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            已打通 1 / 100
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveCategory('全部')
+              setBrowserOpen(true)
+            }}
+            className="hidden shrink-0 items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1.5 text-[10px] font-semibold text-violet-200 transition hover:bg-violet-500/15 lg:flex"
+          >
+            <ListFilter size={11} />
+            100 / 100
+          </button>
         </div>
       </header>
 
-      <main id="top" className="mx-auto max-w-[1540px] px-4 pb-8 pt-5 sm:px-6">
-        <section className="mb-4 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <div>
-            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-              <span>Hot 100</span>
-              <ChevronRight size={11} />
-              <span className="text-violet-400">滑动窗口</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-[22px] font-bold tracking-tight text-slate-100 sm:text-[25px]">
-                3. 无重复字符的最长子串
-              </h1>
-              <span className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-semibold text-amber-300">
-                中等
-              </span>
-              <span className="rounded-md border border-slate-800 bg-slate-900/60 px-2 py-1 font-mono text-[10px] text-slate-500">
-                Sliding Window
-              </span>
-            </div>
-            <p className="mt-2 max-w-2xl text-[12px] leading-5 text-slate-500">
-              移动右边界探索新字符；遇到窗口内重复时，让左边界直接跳过旧位置。
-            </p>
-          </div>
-
-          <div className="w-full lg:w-auto">
-            <form
-              onSubmit={handleSubmit}
-              className="flex w-full items-center gap-2 lg:w-auto"
-            >
-              <label className="sr-only" htmlFor="custom-input">
-                自定义测试字符串
-              </label>
-              <div className="relative min-w-0 flex-1 lg:w-[310px] lg:flex-none">
-                <Search
-                  size={14}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
-                />
+      {browserOpen && (
+        <section className="sticky top-15 z-20 border-b border-slate-800 bg-[#0a0e14]/97 shadow-2xl backdrop-blur-xl">
+          <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6">
+            <div className="mb-3 flex items-center gap-3">
+              <div className="relative min-w-0 flex-1">
+                <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
                 <input
-                  id="custom-input"
-                  className="h-10 w-full rounded-xl border border-slate-800 bg-[#0d131c] pl-9 pr-3 font-mono text-[12px] text-slate-200 outline-none transition placeholder:text-slate-700 focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/10"
-                  value={draftInput}
-                  onChange={(event) => {
-                    setDraftInput(event.target.value)
-                    setInputError('')
-                  }}
-                  placeholder="输入测试字符串，例如 pwwkew"
-                  spellCheck={false}
+                  autoFocus
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="h-10 w-full rounded-xl border border-slate-800 bg-slate-950/70 pl-9 pr-3 text-[12px] text-slate-200 outline-none placeholder:text-slate-700 focus:border-violet-500/60"
+                  placeholder="搜索题号、题名、英文 slug 或算法模板"
                 />
               </div>
-              <button
-                className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-slate-100 px-4 text-[11px] font-bold text-slate-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
-                type="submit"
-              >
-                <Play size={13} fill="currentColor" />
-                重新运行
-              </button>
-            </form>
-            <div className="mt-2 flex min-h-5 flex-wrap items-center gap-2">
-              <span className="text-[9px] text-slate-700">试试</span>
-              {['abcabcbb', 'pwwkew', 'bbbbb', 'dvdf'].map((preset) => (
+              <button type="button" onClick={() => setBrowserOpen(false)} className="icon-button" aria-label="关闭题库"><X size={15} /></button>
+            </div>
+            <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1">
+              {['全部', ...categories].map((category) => (
+                <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-[9px] font-semibold transition ${activeCategory === category ? 'border-violet-500/35 bg-violet-500/12 text-violet-200' : 'border-slate-800 text-slate-600 hover:text-slate-300'}`}>{category}</button>
+              ))}
+            </div>
+            <div className="grid max-h-[48vh] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProblems.map((candidate) => (
                 <button
-                  key={preset}
+                  key={candidate.id}
                   type="button"
-                  onClick={() => runWithInput(preset)}
-                  className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${
-                    activeInput === preset
-                      ? 'bg-violet-500/15 text-violet-300'
-                      : 'text-slate-600 hover:bg-slate-900 hover:text-slate-400'
-                  }`}
+                  onClick={() => selectProblem(candidate)}
+                  className={`group flex min-h-17 items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition ${candidate.id === problem.id ? 'border-violet-500/45 bg-violet-500/10' : 'border-slate-800 bg-slate-950/35 hover:border-slate-700 hover:bg-slate-900/70'}`}
                 >
-                  {preset}
+                  <span className="grid h-8 w-10 shrink-0 place-items-center rounded-lg bg-slate-900 font-mono text-[10px] font-bold text-slate-500 group-hover:text-violet-300">{candidate.id}</span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-[11px] font-semibold text-slate-200">{candidate.title}</span>
+                    <span className="mt-1 block truncate text-[9px] text-slate-600">{candidate.category} · {candidate.pattern}</span>
+                  </span>
                 </button>
               ))}
-              {inputError && (
-                <span className="text-[9px] text-rose-400">{inputError}</span>
-              )}
             </div>
           </div>
         </section>
+      )}
 
-        <Visualizer
-          steps={steps}
-          sourceCode={solutionCode}
-          resetKey={resetKey}
-          renderSnapshot={(snapshot) => (
-            <SlidingWindowView snapshot={snapshot} />
+      <main id="top" className="mx-auto max-w-[1600px] px-4 pb-8 pt-5 sm:px-6">
+        <section className="mb-4 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+              <button type="button" onClick={() => { setActiveCategory('全部'); setBrowserOpen(true) }} className="transition hover:text-violet-300">Hot 100</button>
+              <ChevronRight size={11} />
+              <button type="button" onClick={() => { setActiveCategory(problem.category); setBrowserOpen(true) }} className="text-violet-400 transition hover:text-violet-300">{problem.category}</button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-[22px] font-bold tracking-tight text-slate-100 sm:text-[25px]">{problem.id}. {problem.title}</h1>
+              <DifficultyBadge difficulty={problem.difficulty} />
+              <span className="rounded-md border border-slate-800 bg-slate-900/60 px-2 py-1 font-mono text-[10px] text-slate-500">{problem.pattern}</span>
+            </div>
+            <p className="mt-2 max-w-3xl text-[12px] leading-5 text-slate-500">{problem.summary}</p>
+          </div>
+
+          {problem.id === 3 ? (
+            <div className="w-full lg:w-auto">
+              <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 lg:w-auto">
+                <label className="sr-only" htmlFor="custom-input">自定义测试字符串</label>
+                <div className="relative min-w-0 flex-1 lg:w-[310px] lg:flex-none">
+                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+                  <input id="custom-input" className="h-10 w-full rounded-xl border border-slate-800 bg-[#0d131c] pl-9 pr-3 font-mono text-[12px] text-slate-200 outline-none transition placeholder:text-slate-700 focus:border-violet-500/60 focus:ring-2 focus:ring-violet-500/10" value={draftInput} onChange={(event) => { setDraftInput(event.target.value); setInputError('') }} placeholder="输入测试字符串，例如 pwwkew" spellCheck={false} />
+                </div>
+                <button className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-slate-100 px-4 text-[11px] font-bold text-slate-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" type="submit"><Play size={13} fill="currentColor" />重新运行</button>
+              </form>
+              <div className="mt-2 flex min-h-5 flex-wrap items-center gap-2">
+                <span className="text-[9px] text-slate-700">试试</span>
+                {['abcabcbb', 'pwwkew', 'bbbbb', 'dvdf'].map((preset) => <button key={preset} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/15 text-violet-300' : 'text-slate-600 hover:bg-slate-900 hover:text-slate-400'}`}>{preset}</button>)}
+                {inputError && <span className="text-[9px] text-rose-400">{inputError}</span>}
+              </div>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setBrowserOpen(true)} className="flex h-10 shrink-0 items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 text-[10px] font-semibold text-slate-400 transition hover:border-violet-500/35 hover:text-violet-200"><ListFilter size={13} />切换题目</button>
           )}
-        />
+        </section>
+
+        <ProblemPlayback problem={problem} activeInput={activeInput} resetKey={resetKey} />
 
         <footer className="mt-4 flex flex-col gap-2 border-t border-slate-900 pt-4 text-[10px] text-slate-700 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles size={11} />
-            先理解窗口不变量，再记模板
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <TimerReset size={11} />
-              空格 播放/暂停
-            </span>
-            <span>← → 单步切换</span>
-          </div>
+          <div className="flex items-center gap-2"><Sparkles size={11} />100 道标准 C++ · 统一播放协议 · 11 类数据结构视图</div>
+          <div className="flex items-center gap-4"><span className="flex items-center gap-1.5"><TimerReset size={11} />空格 播放/暂停</span><span>← → 单步切换</span></div>
         </footer>
       </main>
     </div>
   )
 }
 
-const categories = [
-  { name: '哈希', icon: Hash },
-  { name: '双指针', icon: Route },
-  { name: '滑动窗口', icon: ScanWindowIcon, active: true },
-  { name: '链表', icon: GitBranch },
-  { name: '二叉树', icon: Binary },
-  { name: '回溯', icon: ListTree },
-  { name: '动态规划', icon: Layers3 },
-  { name: '图', icon: Network },
-  { name: '栈', icon: Braces },
-  { name: '贪心', icon: CircleDot },
-]
+function ProblemPlayback({ problem, activeInput, resetKey }: { problem: ProblemDefinition; activeInput: string; resetKey: number }) {
+  if (problem.id === 3) {
+    return <LongestSubstringPlayback problem={problem} input={activeInput} resetKey={resetKey} />
+  }
+  return <GenericPlayback problem={problem} resetKey={resetKey} />
+}
 
-function ScanWindowIcon({ size = 14 }: { size?: number }) {
-  return (
-    <span
-      className="relative inline-block rounded-[3px] border border-current"
-      style={{ width: size, height: Math.max(8, size - 3) }}
-      aria-hidden="true"
-    >
-      <span className="absolute inset-y-[2px] left-[3px] right-[3px] rounded-[1px] bg-current opacity-35" />
-    </span>
-  )
+function LongestSubstringPlayback({ problem, input, resetKey }: { problem: ProblemDefinition; input: string; resetKey: number }) {
+  const steps = useMemo(() => generateLongestSubstringSteps(input), [input])
+  return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName="SlidingWindowView" renderSnapshot={(snapshot) => <SlidingWindowView snapshot={snapshot} />} />
+}
+
+function GenericPlayback({ problem, resetKey }: { problem: ProblemDefinition; resetKey: number }) {
+  const steps = useMemo(() => generateProblemSteps(problem), [problem])
+  return <Visualizer steps={steps} sourceCode={problem.sourceCode} resetKey={resetKey} viewName={`${problem.visualKind} · ${problem.pattern}`} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
+}
+
+function DifficultyBadge({ difficulty }: { difficulty: ProblemDefinition['difficulty'] }) {
+  const classes = difficulty === '简单'
+    ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+    : difficulty === '困难'
+      ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+      : 'border-amber-500/20 bg-amber-500/10 text-amber-300'
+  return <span className={`rounded-md border px-2 py-1 text-[10px] font-semibold ${classes}`}>{difficulty}</span>
 }
 
 export default App
