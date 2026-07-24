@@ -27,6 +27,16 @@ describe('Hot 100 catalog', () => {
     }
   })
 
+  it('uses the requested backCall implementation for combination sum', () => {
+    const combinationSum = problems.find((problem) => problem.id === 39)
+    expect(combinationSum?.sourceCode).toContain('vector<int> oneResult;')
+    expect(combinationSum?.sourceCode).toContain('sum = 0;')
+    expect(combinationSum?.sourceCode).toContain(
+      'backCall(candidates, target, i);',
+    )
+    expect(combinationSum?.sourceCode).toContain('return result;')
+  })
+
   it('provides standard C++ and valid animation frames for every problem', () => {
     const observedStepCounts = new Set<number>()
     for (const problem of problems) {

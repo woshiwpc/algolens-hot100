@@ -925,21 +925,33 @@ public:
     }
 };`,
   39: String.raw`class Solution {
-    vector<vector<int>> ans;
-    vector<int> path;
-    void dfs(vector<int>& candidates, int start, int remain) {
-        if (remain == 0) { ans.push_back(path); return; }
-        for (int i = start; i < candidates.size() && candidates[i] <= remain; ++i) {
-            path.push_back(candidates[i]);
-            dfs(candidates, i, remain - candidates[i]);
-            path.pop_back();
+public:
+    vector<int> oneResult;
+    vector<vector<int>> result;
+    int sum = 0;
+
+    void backCall(vector<int>& candidates, int target, int index){
+        sum = 0;
+        for(int i : oneResult){
+            sum += i;
+        }
+        if(sum > target){
+            return;
+        }
+        if(sum == target){
+            result.push_back(oneResult);
+            return;
+        }
+        for(int i = index; i < candidates.size(); i++){
+            oneResult.push_back(candidates[i]);
+            backCall(candidates, target, i);
+            oneResult.pop_back();
         }
     }
-public:
+
     vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
-        sort(candidates.begin(), candidates.end());
-        dfs(candidates, 0, target);
-        return ans;
+        backCall(candidates, target, 0);
+        return result;
     }
 };`,
   22: String.raw`class Solution {
