@@ -250,12 +250,12 @@ function ProblemPlayback({ problem, example, resetKey }: { problem: ProblemDefin
 
 function LongestSubstringPlayback({ problem, input, resetKey }: { problem: ProblemDefinition; input: string; resetKey: number }) {
   const steps = useMemo(() => generateLongestSubstringSteps(input), [input])
-  return <Visualizer steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName="SlidingWindowView" renderSnapshot={(snapshot) => <SlidingWindowView snapshot={snapshot} />} />
+  return <Visualizer key={problem.id} steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName="SlidingWindowView" renderSnapshot={(snapshot) => <SlidingWindowView snapshot={snapshot} />} />
 }
 
 function GenericPlayback({ problem, example, resetKey }: { problem: ProblemDefinition; example: ProblemExample; resetKey: number }) {
   const steps = useMemo(() => generateProblemSteps(problem, example), [problem, example])
-  return <Visualizer steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName={problem.pattern} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
+  return <Visualizer key={problem.id} steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName={problem.pattern} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: ProblemDefinition['difficulty'] }) {
