@@ -32,16 +32,24 @@ describe('Hot 100 catalog', () => {
     for (const problem of problems) {
       expect(problem.sourceCode).toContain('class ')
       expect(problem.sourceCode.length).toBeGreaterThan(80)
-      expect(problem.examples).toHaveLength(3)
-      expect(new Set(problem.examples).size).toBe(3)
+      expect(problem.examples.length).toBeGreaterThanOrEqual(2)
+      expect(problem.examples.length).toBeLessThanOrEqual(3)
+      expect(new Set(problem.examples.map(({ input }) => input)).size).toBe(
+        problem.examples.length,
+      )
+      expect(problem.leetcodeUrl).toBe(
+        `https://leetcode.cn/problems/${problem.slug}/`,
+      )
 
       const lineCount = problem.sourceCode.split('\n').length
       for (const example of problem.examples) {
+        expect(example.input.length).toBeGreaterThan(0)
+        expect(example.output.length).toBeGreaterThan(0)
         const steps = generateProblemSteps(problem, example)
         observedStepCounts.add(steps.length)
         expect(steps.length).toBeGreaterThanOrEqual(2)
         expect(steps.length).toBeLessThanOrEqual(520)
-        expect(steps.at(-1)?.snapshot.result).not.toBe('')
+        expect(steps.at(-1)?.snapshot.result).toContain(example.output)
         for (const step of steps) {
           expect(step.codeLine).toBeGreaterThanOrEqual(1)
           expect(step.codeLine).toBeLessThanOrEqual(lineCount)

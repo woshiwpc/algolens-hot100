@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync:hot100": "node scripts/sync-leetcode-hot100.mjs"
   },
   "dependencies": {
     "@codemirror/lang-cpp": "^6.0.3",

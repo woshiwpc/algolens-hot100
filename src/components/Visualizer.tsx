@@ -113,7 +113,7 @@ export function Visualizer<TSnapshot>({
 
   return (
     <>
-      <div className="grid gap-3 xl:grid-cols-[minmax(380px,.83fr)_minmax(540px,1.17fr)]">
+      <div className="visualizer-grid grid min-h-0 gap-3 xl:grid-cols-[minmax(380px,.83fr)_minmax(540px,1.17fr)]">
         <CodePanel
           code={displayCode}
           activeLine={currentStep.codeLine}
@@ -122,7 +122,7 @@ export function Visualizer<TSnapshot>({
           onResetCode={() => setDisplayCode(sourceCode)}
         />
 
-        <section className="panel flex min-h-[430px] flex-col overflow-hidden">
+        <section className="panel flex h-full min-h-0 flex-col overflow-hidden">
           <header className="panel-header">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-2.5 w-2.5">

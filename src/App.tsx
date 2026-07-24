@@ -3,6 +3,7 @@ import {
   Boxes,
   Braces,
   CircleDot,
+  ExternalLink,
   GitBranch,
   Grid3X3,
   Hash,
@@ -10,14 +11,13 @@ import {
   ListFilter,
   ListTree,
   Network,
-  Play,
   Route,
   Search,
   Sparkles,
   X,
 } from 'lucide-react'
-import { useMemo, useState, type FormEvent } from 'react'
-import type { ProblemDefinition } from './catalog/types'
+import { useMemo, useState } from 'react'
+import type { ProblemDefinition, ProblemExample } from './catalog/types'
 import { categories, problems, problemsById } from './catalog/problems'
 import { generateProblemSteps } from './catalog/generateSteps'
 import { UniversalView } from './components/UniversalView'
@@ -57,12 +57,11 @@ function App() {
   const [activeCategory, setActiveCategory] = useState('全部')
   const [browserOpen, setBrowserOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [draftInput, setDraftInput] = useState('abcabcbb')
-  const [activeInput, setActiveInput] = useState('abcabcbb')
   const [resetKey, setResetKey] = useState(0)
-  const [inputError, setInputError] = useState('')
 
   const problem = problemsById.get(activeProblemId) ?? problems[0]
+  const activeExample =
+    problem.examples[Math.min(activeExampleIndex, problem.examples.length - 1)]
   const filteredProblems = useMemo(() => {
     const keyword = query.trim().toLowerCase()
     return problems.filter((candidate) => {
@@ -80,22 +79,6 @@ function App() {
     setResetKey((key) => key + 1)
     window.history.replaceState(null, '', `#problem-${selected.id}`)
     window.scrollTo({ top: 0, behavior: 'instant' })
-  }
-
-  const runWithInput = (value: string) => {
-    if (Array.from(value).length > 18) {
-      setInputError('为保证动画清晰，请输入不超过 18 个字符。')
-      return
-    }
-    setInputError('')
-    setDraftInput(value)
-    setActiveInput(value)
-    setResetKey((key) => key + 1)
-  }
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault()
-    runWithInput(draftInput)
   }
 
   return (
@@ -206,59 +189,63 @@ function App() {
             </div>
           </div>
 
-          {problem.id === 3 ? (
-            <div className="w-full lg:w-auto">
-              <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 lg:w-auto">
-                <label className="sr-only" htmlFor="custom-input">自定义测试字符串</label>
-                <div className="relative min-w-0 flex-1 lg:w-[310px] lg:flex-none">
-                  <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input id="custom-input" className="h-10 w-full rounded-xl border border-slate-600/70 bg-[#202c40] pl-9 pr-3 font-mono text-[12px] text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-violet-400/70 focus:ring-2 focus:ring-violet-500/10" value={draftInput} onChange={(event) => { setDraftInput(event.target.value); setInputError('') }} placeholder="输入字符串" spellCheck={false} />
-                </div>
-                <button className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-slate-100 px-4 text-[11px] font-bold text-slate-950 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" type="submit"><Play size={13} fill="currentColor" />重新运行</button>
-              </form>
-              <div className="mt-2 flex min-h-5 flex-wrap items-center gap-2">
-                {problem.examples.map((example) => {
-                  const preset = example.match(/"([^"]*)"/)?.[1] ?? example
-                  return <button key={example} type="button" onClick={() => runWithInput(preset)} className={`rounded-md px-1.5 py-0.5 font-mono text-[9px] transition ${activeInput === preset ? 'bg-violet-500/20 text-violet-200' : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-100'}`}>{preset || '空串'}</button>
-                })}
-                {inputError && <span className="text-[9px] text-rose-400">{inputError}</span>}
-              </div>
-            </div>
-          ) : (
-            <div className="w-full lg:w-[470px]">
-              <div className="flex items-center justify-end gap-2">
-                {problem.examples.map((example, index) => (
-                  <button
-                    key={example}
-                    type="button"
-                    onClick={() => {
-                      setActiveExampleIndex(index)
-                      setResetKey((key) => key + 1)
-                    }}
-                    title={example}
-                    className={`h-9 rounded-lg border px-3 text-[10px] font-semibold transition ${activeExampleIndex === index ? 'border-violet-400/55 bg-violet-500/18 text-violet-100' : 'border-slate-600/70 bg-[#202c40] text-slate-400 hover:border-slate-500 hover:text-slate-100'}`}
-                  >
-                    示例 {index + 1}
-                  </button>
-                ))}
-                <button type="button" onClick={() => setBrowserOpen(true)} className="icon-button" aria-label="切换题目" title="切换题目"><ListFilter size={13} /></button>
-              </div>
-            </div>
-          )}
+          <div className="flex w-full items-center justify-end gap-2 lg:w-auto">
+            {problem.examples.map((example, index) => (
+              <button
+                key={`${example.label}-${example.input}`}
+                type="button"
+                onClick={() => {
+                  setActiveExampleIndex(index)
+                  setResetKey((key) => key + 1)
+                }}
+                title={`${example.input} → ${example.output}`}
+                className={`h-9 rounded-lg border px-3 text-[10px] font-semibold transition ${activeExampleIndex === index ? 'border-violet-400/55 bg-violet-500/18 text-violet-100' : 'border-slate-600/70 bg-[#202c40] text-slate-400 hover:border-slate-500 hover:text-slate-100'}`}
+              >
+                {example.label}
+              </button>
+            ))}
+            <button type="button" onClick={() => setBrowserOpen(true)} className="icon-button" aria-label="切换题目" title="切换题目"><ListFilter size={13} /></button>
+          </div>
         </section>
 
-        <ProblemPlayback problem={problem} activeInput={activeInput} sample={problem.examples[activeExampleIndex]} resetKey={resetKey} />
+        <section className="mb-3 grid gap-px overflow-hidden rounded-xl border border-slate-700/70 bg-slate-700/70 sm:grid-cols-[minmax(0,1.45fr)_minmax(0,.75fr)_auto]">
+          <div className="min-w-0 bg-[#1a2639] px-3 py-2.5">
+            <span className="mb-1 block text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">输入</span>
+            <code className="block overflow-x-auto whitespace-pre font-mono text-[11px] leading-5 text-slate-100">{activeExample.input}</code>
+          </div>
+          <div className="min-w-0 bg-[#1a2639] px-3 py-2.5">
+            <span className="mb-1 flex items-center gap-1.5 text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+              输出
+              {activeExample.source === 'supplement' && (
+                <em className="not-italic text-amber-300/80">补充</em>
+              )}
+            </span>
+            <code className="block overflow-x-auto whitespace-pre font-mono text-[11px] leading-5 text-emerald-200">{activeExample.output}</code>
+          </div>
+          <a
+            href={problem.leetcodeUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex min-h-12 items-center justify-center gap-1.5 bg-[#1a2639] px-3 text-[9px] font-semibold text-slate-400 transition hover:text-violet-200"
+          >
+            力扣原题
+            <ExternalLink size={10} />
+          </a>
+        </section>
+
+        <ProblemPlayback problem={problem} example={activeExample} resetKey={resetKey} />
         </main>
       </div>
     </div>
   )
 }
 
-function ProblemPlayback({ problem, activeInput, sample, resetKey }: { problem: ProblemDefinition; activeInput: string; sample: string; resetKey: number }) {
+function ProblemPlayback({ problem, example, resetKey }: { problem: ProblemDefinition; example: ProblemExample; resetKey: number }) {
   if (problem.id === 3) {
-    return <LongestSubstringPlayback problem={problem} input={activeInput} resetKey={resetKey} />
+    const input = example.input.match(/\bs\s*=\s*"([^"]*)"/)?.[1] ?? ''
+    return <LongestSubstringPlayback problem={problem} input={input} resetKey={resetKey} />
   }
-  return <GenericPlayback problem={problem} sample={sample} resetKey={resetKey} />
+  return <GenericPlayback problem={problem} example={example} resetKey={resetKey} />
 }
 
 function LongestSubstringPlayback({ problem, input, resetKey }: { problem: ProblemDefinition; input: string; resetKey: number }) {
@@ -266,8 +253,8 @@ function LongestSubstringPlayback({ problem, input, resetKey }: { problem: Probl
   return <Visualizer steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName="SlidingWindowView" renderSnapshot={(snapshot) => <SlidingWindowView snapshot={snapshot} />} />
 }
 
-function GenericPlayback({ problem, sample, resetKey }: { problem: ProblemDefinition; sample: string; resetKey: number }) {
-  const steps = useMemo(() => generateProblemSteps(problem, sample), [problem, sample])
+function GenericPlayback({ problem, example, resetKey }: { problem: ProblemDefinition; example: ProblemExample; resetKey: number }) {
+  const steps = useMemo(() => generateProblemSteps(problem, example), [problem, example])
   return <Visualizer steps={steps} sourceCode={problem.sourceCode} codeReference={problem.codeReference} resetKey={resetKey} viewName={problem.pattern} renderSnapshot={(snapshot) => <UniversalView snapshot={snapshot} />} />
 }
 

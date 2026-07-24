@@ -182,7 +182,7 @@ export function CodePanel({
   }
 
   return (
-    <section className="panel flex min-h-[430px] flex-col overflow-hidden">
+    <section className="panel flex h-full min-h-0 flex-col overflow-hidden">
       <header className="panel-header">
         <div className="flex min-w-0 items-center gap-2">
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-violet-500/10 text-violet-300">

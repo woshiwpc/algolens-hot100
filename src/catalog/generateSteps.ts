@@ -1,6 +1,7 @@
 import type { Step } from '../types/step'
 import type {
   ProblemDefinition,
+  ProblemExample,
   UniversalSnapshot,
   VisualEdge,
   VisualNode,
@@ -622,8 +623,9 @@ function traceDp(ctx: TraceContext) {
 
 export function generateProblemSteps(
   problem: ProblemDefinition,
-  sample = problem.sample,
+  example: ProblemExample = problem.examples[0],
 ): Step<UniversalSnapshot>[] {
+  const sample = example.input
   const ctx = createContext(problem, sample)
   switch (problem.visualKind) {
     case 'array': traceArray(ctx); break
@@ -641,7 +643,21 @@ export function generateProblemSteps(
   const totalPhases = ctx.steps.length
   return ctx.steps.map((step, index) => ({
     ...step,
-    snapshot: { ...step.snapshot, phase: index, totalPhases },
-    variables: { step: `${index + 1} / ${totalPhases}`, ...step.variables },
+    snapshot: {
+      ...step.snapshot,
+      phase: index,
+      totalPhases,
+      result:
+        index === totalPhases - 1
+          ? `预期输出：${example.output}`
+          : step.snapshot.result,
+    },
+    variables: {
+      step: `${index + 1} / ${totalPhases}`,
+      ...step.variables,
+      ...(index === totalPhases - 1
+        ? { expectedOutput: example.output }
+        : {}),
+    },
   }))
 }

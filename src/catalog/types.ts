@@ -13,6 +13,13 @@ export type VisualKind =
   | 'heap'
   | 'dp'
 
+export interface ProblemExample {
+  label: string
+  input: string
+  output: string
+  source: 'leetcode' | 'supplement'
+}
+
 export interface ProblemDefinition {
   id: number
   title: string
@@ -22,9 +29,10 @@ export interface ProblemDefinition {
   pattern: string
   summary: string
   sample: string
-  examples: [string, string, string]
+  examples: readonly ProblemExample[]
   visualKind: VisualKind
   sourceCode: string
+  leetcodeUrl: string
   codeReference?: {
     label: '代码随想录参考'
     pageTitle: string

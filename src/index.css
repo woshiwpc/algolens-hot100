@@ -231,6 +231,12 @@ button:disabled {
   backdrop-filter: blur(18px);
 }
 
+@media (min-width: 1280px) {
+  .visualizer-grid {
+    height: clamp(400px, calc(100vh - 300px), 560px);
+  }
+}
+
 .step-button {
   display: inline-flex;
   height: 40px;

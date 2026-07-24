@@ -1,5 +1,5 @@
 import { solutions } from './solutions'
-import { extraExamples } from './examples'
+import { officialExamples } from './officialExamples'
 import { carlReferences } from './carlReferences'
 import type { Difficulty, ProblemDefinition, VisualKind } from './types'
 
@@ -119,16 +119,34 @@ const rawProblems: RawProblem[] = [
 ]
 
 export const problems: ProblemDefinition[] = rawProblems.map((problem) => {
-  const [id, title, slug, category, difficulty, pattern, summary, sample, visualKind] = problem
+  const [id, title, slug, category, difficulty, pattern, summary, fallbackSample, visualKind] = problem
   const sourceCode = solutions[id]
   if (!sourceCode) throw new Error(`Missing C++ solution for LeetCode ${id}`)
-  const extras = extraExamples[id]
-  if (!extras) throw new Error(`Missing examples for LeetCode ${id}`)
+  const examples = officialExamples[id]
+  if (!examples || examples.length < 2) {
+    throw new Error(`Missing multiple examples for LeetCode ${id}`)
+  }
+  const sample = examples[0]?.input ?? fallbackSample
   const reference = carlReferences[id]
   const codeReference = reference
     ? { label: '代码随想录参考' as const, ...reference }
     : undefined
-  return { id, title, slug, category, difficulty, pattern, summary, sample, examples: [sample, ...extras], visualKind, sourceCode, codeReference }
+  const leetcodeUrl = `https://leetcode.cn/problems/${slug}/`
+  return {
+    id,
+    title,
+    slug,
+    category,
+    difficulty,
+    pattern,
+    summary,
+    sample,
+    examples,
+    visualKind,
+    sourceCode,
+    leetcodeUrl,
+    codeReference,
+  }
 })
 
 export const categories = Array.from(new Set(problems.map((problem) => problem.category)))
